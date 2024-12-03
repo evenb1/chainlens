@@ -1,9 +1,10 @@
 import React from "react";
+import Header from "./components/Header";
 
 export default function Home() {
   return (
     <div className="relative h-screen w-screen">
- 
+        <Header/>
       {/* Main Content */}
       <div className="flex flex-col justify-center items-center h-full">
         <h1 className="text-5xl font-bold mb-4">Welcome to ChainLens</h1>
