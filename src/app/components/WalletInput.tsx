@@ -45,15 +45,12 @@ const WalletInput: React.FC = () => {
           value={wallet}
           onChange={(e) => setWallet(e.target.value)}
           placeholder="Enter wallet address"
-          className="flex-1 p-2 rounded-md bg-neutral-800 text-white focus:outline-none"
+          className="flex-1 p-2 text-xl rounded-md px-5 bg-neutral-800  text-white focus:outline-none"
         />
-        <button
-          type="submit"
-          className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md"
-          disabled={loading}
-        >
-          {loading ? "Loading..." : "Track"}
-        </button>
+<button className="bg-violet-950 text-violet-400 border border-violet-400 border-b-4 font-medium overflow-hidden relative px-4 py-2 rounded-md hover:brightness-150 hover:border-t-4 hover:border-b active:opacity-75 outline-none duration-300 group">
+  <span className="bg-violet-400 shadow-violet-400 absolute -top-[150%] left-0 inline-flex w-80 h-[5px] rounded-md opacity-50 group-hover:top-[150%] duration-500 shadow-[0_0_10px_10px_rgba(0,0,0,0.3)]"></span>
+Search
+</button>
       </form>
       {data && (
         <div className="mt-6 text-white">
