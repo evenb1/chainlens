@@ -38,7 +38,7 @@ const WalletInput: React.FC = () => {
   };
 
   return (
-    <div className="bg-neutral-900 p-6 rounded-lg shadow-md">
+    <div className="bg-transparent p-6 rounded-lg ">
       <form onSubmit={handleSubmit} className="flex items-center space-x-4">
         <input
           type="text"
