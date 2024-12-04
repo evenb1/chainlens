@@ -20,6 +20,8 @@ export default {
       },
       colors: {
         textHeadline: "var(--sk-headline-text-color, rgb(29, 29, 31))",
+        primary: "#4CAF50", // Customize your colors
+      danger: "#FF5252",
 
         background: "var(--background)",
         foreground: "var(--foreground)",
