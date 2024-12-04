@@ -1,6 +1,7 @@
 import React from "react";
 import Header from "./components/Header";
 import WalletInput from "./components/WalletInput";
+import { Wallet } from 'lucide-react'
 
 export default function Home() {
   return (
@@ -8,9 +9,13 @@ export default function Home() {
         <Header/>
       {/* Main Content */}
       <div className="flex flex-col p-20 items-center h-full">
+
         <h1 className="text-5xl font-bold bg-gradient-to-r from-violet-500 to-blue-500 bg-clip-text text-transparent">Welcome to ChainLens</h1>
         <p className="text-lg font-light text-slate-500 pb-16">Track wallet activities and trends </p>
+        <div className="flex flex-row gap-2">
+
         <WalletInput/>
+        </div>
       </div>
     </div>
   );

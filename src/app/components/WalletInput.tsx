@@ -1,5 +1,6 @@
 "use client"; // Required for client-side interactivity in Next.js
 
+import { Wallet } from "lucide-react";
 import React, { useState } from "react";
 
 const WalletInput: React.FC = () => {
@@ -39,7 +40,9 @@ const WalletInput: React.FC = () => {
 
   return (
     <div className="bg-transparent p-6 rounded-lg ">
-      <form onSubmit={handleSubmit} className="flex items-center space-x-4">
+      <form onSubmit={handleSubmit} className="flex items-center space-x-2">
+      <Wallet className="mr-2 h-8 w-8 text-purple-400" />
+
         <input
           type="text"
           value={wallet}
