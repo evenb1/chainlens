@@ -16,7 +16,7 @@ export async function POST(req: Request) {
       {
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer YOUR_SOLSCAN_API_KEY`, // Replace with your API key
+          Authorization: `Bearer ${process.env.SOLSCAN_API_KEY}`, 
         },
       }
     );
