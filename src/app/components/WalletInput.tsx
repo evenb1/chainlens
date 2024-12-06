@@ -1,4 +1,4 @@
-"use client"; // Required for client-side interactivity in Next.js
+"use client";
 
 import { Wallet } from "lucide-react";
 import React, { useState } from "react";
@@ -12,7 +12,6 @@ const WalletInput: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Validate wallet address
     if (!wallet || wallet.length !== 44) {
       setError("Invalid Solana wallet address. Please enter a valid address.");
       return;
@@ -43,37 +42,42 @@ const WalletInput: React.FC = () => {
   };
 
   return (
-    <div className="bg-transparent p-6 rounded-lg">
-      <form onSubmit={handleSubmit} className="flex items-center space-x-2">
-        <Wallet className="mr-2 h-8 w-8 text-purple-400" />
-
-        <input
-          type="text"
-          value={wallet}
-          onChange={(e) => setWallet(e.target.value)}
-          placeholder="Enter wallet address"
-          className="flex-1 p-2 text-xl rounded-md px-5 bg-neutral-800 text-white focus:outline-none"
-        />
-
+    <div className="bg-gradient-to-br from-purple-800 via-indigo-600 to-blue-500 p-6 rounded-lg shadow-lg">
+      <form
+        onSubmit={handleSubmit}
+        className="flex flex-col space-y-4 items-center justify-center"
+      >
+        <div className="relative w-full">
+          <Wallet className="absolute left-3 top-3 h-6 w-6 text-indigo-400" />
+          <input
+            type="text"
+            value={wallet}
+            onChange={(e) => setWallet(e.target.value)}
+            placeholder="Enter wallet address"
+            className="w-full p-3 pl-10 text-lg rounded-md bg-neutral-900 text-white border-2 border-transparent focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 focus:border-gradient-to-r from-purple-400 via-indigo-500 to-blue-400"
+          />
+        </div>
         <button
           type="submit"
           disabled={loading}
-          className={`bg-violet-950 text-violet-400 border border-violet-400 border-b-4 font-medium overflow-hidden relative px-4 py-2 rounded-md hover:brightness-150 hover:border-t-4 hover:border-b active:opacity-75 outline-none duration-300 group ${
+          className={`relative inline-block px-6 py-3 rounded-lg bg-gradient-to-r from-purple-500 via-indigo-500 to-blue-500 text-white font-bold shadow-md transition-all duration-300 hover:brightness-125 active:scale-95 ${
             loading ? "opacity-50 cursor-not-allowed" : ""
           }`}
         >
-          <span className="bg-violet-400 shadow-violet-400 absolute -top-[150%] left-0 inline-flex w-80 h-[5px] rounded-md opacity-50 group-hover:top-[150%] duration-500 shadow-[0_0_10px_10px_rgba(0,0,0,0.3)]"></span>
-          {loading ? "Loading..." : "Search"}
+          <span
+            className={`absolute inset-0 w-full h-full bg-gradient-to-r from-purple-700 via-indigo-700 to-blue-700 opacity-10 rounded-lg transition-all duration-500 ${
+              loading ? "animate-pulse" : ""
+            }`}
+          ></span>
+          {loading ? "Loading..." : "Track Wallet"}
         </button>
       </form>
 
-      {/* Error Message */}
-      {error && <p className="mt-4 text-red-400">{error}</p>}
+      {error && <p className="mt-4 text-red-400 font-medium">{error}</p>}
 
-      {/* Display Data */}
       {data && (
-        <div className="mt-6 text-white">
-          <h2 className="font-bold text-lg mb-4">Wallet Data:</h2>
+        <div className="mt-6 bg-neutral-900 p-4 rounded-lg shadow-lg">
+          <h2 className="text-xl font-bold text-white mb-4">Wallet Data:</h2>
           <table className="w-full text-left border-collapse border border-gray-700">
             <thead>
               <tr>
