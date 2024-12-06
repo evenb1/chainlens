@@ -1,7 +1,7 @@
 "use client";
 
-import { Wallet } from "lucide-react";
 import React, { useState } from "react";
+import { Wallet } from "lucide-react";
 import ReactPaginate from "react-paginate";
 
 // Helper function to validate Solana wallet addresses
@@ -13,37 +13,43 @@ function isValidSolanaAddress(address: string): boolean {
 const WalletInput: React.FC = () => {
   const [wallet, setWallet] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
-  const [data, setData] = useState<any>(null);
+  const [tokenData, setTokenData] = useState<any>(null);
+  const [transactionData, setTransactionData] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState<number>(0);
   const itemsPerPage = 10;
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    // Validate wallet address
-    if (!wallet || !isValidSolanaAddress(wallet)) {
-      setError("Invalid Solana wallet address. Please enter a valid address.");
-      return;
-    }
-
+  const fetchWalletData = async () => {
     setLoading(true);
     setError(null);
-    setData(null);
+    setTokenData(null);
+    setTransactionData(null);
 
     try {
-      const response = await fetch("/api/solanaWallet", {
+      // Fetch token balances
+      const tokenResponse = await fetch("/api/solanaWallet", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ wallet }),
       });
+      const tokens = await tokenResponse.json();
 
-      const result = await response.json();
+      // Fetch transactions
+      const transactionResponse = await fetch("/api/solanaTransactions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ wallet }),
+      });
+      const transactions = await transactionResponse.json();
 
-      if (response.ok) {
-        setData(result);
+      // Handle responses
+      if (tokenResponse.ok && transactionResponse.ok) {
+        setTokenData(tokens);
+        setTransactionData(transactions);
       } else {
-        setError(result.message || "Failed to fetch wallet data.");
+        setError(
+          tokens.message || transactions.message || "Failed to fetch wallet data."
+        );
       }
     } catch (err) {
       console.error("Error fetching wallet data:", err);
@@ -53,11 +59,20 @@ const WalletInput: React.FC = () => {
     }
   };
 
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!wallet || !isValidSolanaAddress(wallet)) {
+      setError("Invalid Solana wallet address.");
+      return;
+    }
+    fetchWalletData();
+  };
+
   const handlePageChange = ({ selected }: { selected: number }) => {
     setCurrentPage(selected);
   };
 
-  const paginatedTokens = data?.tokens?.slice(
+  const paginatedTokens = tokenData?.tokens?.slice(
     currentPage * itemsPerPage,
     (currentPage + 1) * itemsPerPage
   );
@@ -82,7 +97,6 @@ const WalletInput: React.FC = () => {
             loading ? "opacity-50 cursor-not-allowed" : ""
           }`}
         >
-          <span className="bg-violet-400 shadow-violet-400 absolute -top-[150%] left-0 inline-flex w-80 h-[5px] rounded-md opacity-50 group-hover:top-[150%] duration-500 shadow-[0_0_10px_10px_rgba(0,0,0,0.3)]"></span>
           {loading ? "Loading..." : "Search"}
         </button>
       </form>
@@ -90,11 +104,11 @@ const WalletInput: React.FC = () => {
       {/* Error Message */}
       {error && <p className="mt-4 text-red-400">{error}</p>}
 
-      {/* Display Data */}
-      {data && (
+      {/* Display Token Data */}
+      {tokenData && (
         <div className="mt-6 bg-neutral-900 p-4 rounded-lg shadow-lg">
-          <h2 className="text-xl font-bold text-white mb-4">Wallet Data:</h2>
-          {data.tokens?.length > 0 ? (
+          <h2 className="text-xl font-bold text-white mb-4">Tokens:</h2>
+          {tokenData.tokens?.length > 0 ? (
             <>
               <table className="w-full text-left border-collapse border border-gray-700">
                 <thead>
@@ -116,9 +130,8 @@ const WalletInput: React.FC = () => {
                   ))}
                 </tbody>
               </table>
-              {/* Pagination */}
               <ReactPaginate
-                pageCount={Math.ceil(data.tokens.length / itemsPerPage)}
+                pageCount={Math.ceil(tokenData.tokens.length / itemsPerPage)}
                 onPageChange={handlePageChange}
                 containerClassName="flex justify-center mt-4 space-x-2 text-white"
                 activeClassName="font-bold"
@@ -127,6 +140,24 @@ const WalletInput: React.FC = () => {
             </>
           ) : (
             <p className="text-white mt-4">No tokens found for this wallet.</p>
+          )}
+        </div>
+      )}
+
+      {/* Display Transaction Data */}
+      {transactionData && (
+        <div className="mt-6 bg-neutral-900 p-4 rounded-lg shadow-lg">
+          <h2 className="text-xl font-bold text-white mb-4">Transactions:</h2>
+          {transactionData.transactions?.length > 0 ? (
+            <ul>
+              {transactionData.transactions.map((tx: any, index: number) => (
+                <li key={index} className="text-white mb-2">
+                  Transaction: {tx.signature}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-white mt-4">No transactions found for this wallet.</p>
           )}
         </div>
       )}
