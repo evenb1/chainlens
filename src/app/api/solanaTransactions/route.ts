@@ -11,7 +11,7 @@ export async function POST(req: Request) {
       );
     }
 
-    const apiUrl = `https://pro-api.solscan.io/v2.0/account/token-accounts?page=${page}&page_size=${page_size}&address=${wallet}`;
+    const apiUrl = `https://pro-api.solscan.io/v2.0/account/transactions?page=${page}&page_size=${page_size}&address=${wallet}`;
 
     const response = await fetch(apiUrl, {
       method: "GET",
@@ -24,7 +24,7 @@ export async function POST(req: Request) {
     if (!response.ok) {
       const errorData = await response.json();
       return NextResponse.json(
-        { message: errorData.message || "Failed to fetch wallet data." },
+        { message: errorData.message || "Failed to fetch transactions." },
         { status: response.status }
       );
     }
