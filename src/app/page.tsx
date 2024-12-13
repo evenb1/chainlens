@@ -25,7 +25,16 @@ const HomePage = () => {
         </p>
         <form onSubmit={handleSubmit} className="flex flex-col items-center space-y-4">
           <div className="flex items-center bg-neutral-800 p-2 rounded-md w-full">
-            
+          <Wallet className="mr-3 h-8 w-8 text-purple-400" />
+            <input
+              type="text"
+              value={wallet}
+              onChange={(e) => setWallet(e.target.value)}
+              placeholder="Enter wallet address"
+              className="flex-1 p-2 text-xl rounded-md bg-transparent text-white focus:outline-none"
+            />
+          </div>
+         
         </form>
       </div>
     </div>
