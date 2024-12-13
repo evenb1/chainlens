@@ -1,52 +1,33 @@
-import React, { useState } from "react";
-import { Wallet } from "lucide-react"; // Icon library (you can replace it if needed)
+import React from "react";
+import Header from "./components/Header";
+import WalletInput from "./components/WalletInput";
 
-const HomePage = () => {
-  const [wallet, setWallet] = useState("");
-  const [loading, setLoading] = useState(false);
-
-  const handleSubmit = (e: { preventDefault: () => void; }) => {
-    e.preventDefault();
-    if (wallet.trim()) {
-      setLoading(true);
-      // Add logic to handle wallet submission
-      setTimeout(() => setLoading(false), 1500); // Simulate loading
-    }
-  };
-
+export default function Home() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-black via-purple-900 to-black text-white flex items-center justify-center">
-      <div className="glass p-8 rounded-lg shadow-xl text-center max-w-lg w-full">
-        <h1 className="text-3xl font-extrabold text-violet-400 mb-4">
-          Meme Coin Sentiment Analyzer
+    <div className="relative h-screen w-screen bg-gradient-to-br from-black via-violet-900 to-black text-white">
+      {/* Header */}
+      <Header />
+      
+      {/* Main Content */}
+      <div className="flex flex-col items-center justify-center h-full p-6">
+        {/* Title */}
+        <h1 className="text-5xl font-extrabold bg-gradient-to-r from-violet-500 to-blue-500 bg-clip-text text-transparent">
+          Welcome to ChainLens
         </h1>
-        <p className="text-gray-300 mb-6">
-          Analyze wallet activity and social trends of meme coins in real-time.
+        {/* Subtitle */}
+        <p className="text-lg font-light text-slate-400 mt-4">
+          Track wallet activities and trends in real-time
         </p>
-        <form onSubmit={handleSubmit} className="flex flex-col items-center space-y-4">
-          <div className="flex items-center bg-neutral-800 p-2 rounded-md w-full">
-          <Wallet className="mr-3 h-8 w-8 text-purple-400" />
-            <input
-              type="text"
-              value={wallet}
-              onChange={(e) => setWallet(e.target.value)}
-              placeholder="Enter wallet address"
-              className="flex-1 p-2 text-xl rounded-md bg-transparent text-white focus:outline-none"
-            />
-          </div>
-          <button
-            type="submit"
-            disabled={loading}
-            className={`bg-violet-950 text-violet-400 border border-violet-400 border-b-4 font-medium overflow-hidden relative px-4 py-2 rounded-md hover:brightness-150 hover:border-t-4 hover:border-b active:opacity-75 outline-none duration-300 ${
-              loading ? "opacity-50 cursor-not-allowed" : ""
-            }`}
-          >
-            {loading ? "Loading..." : "Analyze"}
-          </button>
-        </form>
+        
+        {/* Wallet Input Section */}
+        <div className="flex flex-col items-center mt-10">
+          <WalletInput />
+          {/* Additional Links or Features (Optional) */}
+          <p className="text-sm text-slate-500">
+            Powered by advanced blockchain analytics
+          </p>
+        </div>
       </div>
     </div>
   );
-};
-
-export default HomePage;
+}
