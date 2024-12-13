@@ -23,7 +23,10 @@ const HomePage = () => {
         <p className="text-gray-300 mb-6">
           Analyze wallet activity and social trends of meme coins in real-time.
         </p>
-       
+        <form onSubmit={handleSubmit} className="flex flex-col items-center space-y-4">
+          <div className="flex items-center bg-neutral-800 p-2 rounded-md w-full">
+            
+        </form>
       </div>
     </div>
   );
