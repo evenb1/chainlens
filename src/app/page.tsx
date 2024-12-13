@@ -34,7 +34,15 @@ const HomePage = () => {
               className="flex-1 p-2 text-xl rounded-md bg-transparent text-white focus:outline-none"
             />
           </div>
-         
+          <button
+            type="submit"
+            disabled={loading}
+            className={`bg-violet-950 text-violet-400 border border-violet-400 border-b-4 font-medium overflow-hidden relative px-4 py-2 rounded-md hover:brightness-150 hover:border-t-4 hover:border-b active:opacity-75 outline-none duration-300 ${
+              loading ? "opacity-50 cursor-not-allowed" : ""
+            }`}
+          >
+            {loading ? "Loading..." : "Analyze"}
+          </button>
         </form>
       </div>
     </div>
