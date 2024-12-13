@@ -1,13 +1,22 @@
 "use client";
 import React, { useState } from "react";
 
-export default function WalletInput() {
-  const [wallet, setWallet] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [data, setData] = useState(null);
-  const [error, setError] = useState("");
+interface WalletBalance {
+  mintAddress: string;
+  amount: number;
+}
 
-  const handleSubmit = async (e: { preventDefault: () => void }) => {
+interface WalletData {
+  balances: WalletBalance[];
+}
+
+export default function WalletInput() {
+  const [wallet, setWallet] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(false);
+  const [data, setData] = useState<WalletData | null>(null); // Typed state
+  const [error, setError] = useState<string>("");
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!wallet.trim()) return;
 
@@ -16,11 +25,10 @@ export default function WalletInput() {
     setData(null);
 
     try {
-      // Call backend API (replace `/api/getWalletData` with your endpoint)
       const response = await fetch(`/api/getWalletData?walletAddress=${wallet}`);
       if (!response.ok) throw new Error("Failed to fetch wallet data");
 
-      const result = await response.json();
+      const result: WalletData = await response.json(); // Ensure response matches WalletData
       setData(result);
     } catch (err) {
       setError("Invalid wallet address or failed to fetch data.");
@@ -59,7 +67,7 @@ export default function WalletInput() {
         <div className="mt-6 p-4 bg-neutral-800 rounded-md shadow-lg">
           <h2 className="text-lg font-bold text-violet-400">Wallet Data</h2>
           <ul className="mt-2 space-y-2 text-white">
-            {data.balances.map((balance: any, index: number) => (
+            {data.balances.map((balance, index) => (
               <li key={index} className="flex justify-between">
                 <span>{balance.mintAddress}</span>
                 <span>{balance.amount.toFixed(2)}</span>
