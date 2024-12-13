@@ -15,7 +15,17 @@ const HomePage = () => {
   };
 
   return (
-    
+    <div className="min-h-screen bg-gradient-to-br from-black via-purple-900 to-black text-white flex items-center justify-center">
+      <div className="glass p-8 rounded-lg shadow-xl text-center max-w-lg w-full">
+        <h1 className="text-3xl font-extrabold text-violet-400 mb-4">
+          Meme Coin Sentiment Analyzer
+        </h1>
+        <p className="text-gray-300 mb-6">
+          Analyze wallet activity and social trends of meme coins in real-time.
+        </p>
+       
+      </div>
+    </div>
   );
 };
 
