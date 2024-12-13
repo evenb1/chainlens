@@ -4,7 +4,7 @@ import WalletInput from "./components/WalletInput";
 
 export default function Home() {
   return (
-    <div className="relative h-screen w-screen bg-gradient-to-br from-black via-violet-900 to-black text-white">
+    <div className="relative h-screen w-screen bg-gradient-to-br from-black  to-black text-white">
       {/* Header */}
       <Header />
       
