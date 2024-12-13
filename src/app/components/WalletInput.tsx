@@ -64,18 +64,27 @@ export default function WalletInput() {
 
       {/* Display Results */}
       {data && (
-        <div className="mt-6 p-4 bg-neutral-800 rounded-md shadow-lg">
-          <h2 className="text-lg font-bold text-violet-400">Wallet Data</h2>
-          <ul className="mt-2 space-y-2 text-white">
-            {data.balances.map((balance, index) => (
-              <li key={index} className="flex justify-between">
-                <span>{balance.mintAddress}</span>
-                <span>{balance.amount.toFixed(2)}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
+  <div className="mt-6 p-4 bg-neutral-800 rounded-md shadow-lg">
+    <h2 className="text-lg font-bold text-violet-400 mb-4">Wallet Data</h2>
+    <table className="w-full text-left border-collapse">
+      <thead>
+        <tr className="border-b border-gray-700">
+          <th className="py-2 px-4 text-slate-400">Token Address</th>
+          <th className="py-2 px-4 text-slate-400">Amount</th>
+        </tr>
+      </thead>
+      <tbody>
+        {data.balances.map((balance, index) => (
+          <tr key={index} className="border-b border-gray-700">
+            <td className="py-2 px-4 text-white">{balance.mintAddress}</td>
+            <td className="py-2 px-4 text-white">{balance.amount.toFixed(2)}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+)}
+
     </div>
   );
 }
