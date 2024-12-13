@@ -9,18 +9,18 @@ export default function Home() {
       <Header />
       
       {/* Main Content */}
-      <div className="flex flex-col items-center justify-center h-full p-6">
+      <div className="flex flex-col items-center justify-center pt-28 p-6">
         {/* Title */}
         <h1 className="text-5xl font-extrabold bg-gradient-to-r from-violet-500 to-blue-500 bg-clip-text text-transparent">
           Welcome to ChainLens
         </h1>
         {/* Subtitle */}
         <p className="text-lg font-light text-slate-400 mt-4">
-          Track wallet activities and trends in real-time
+          Analyze wallet activity and social trends of meme coins in real-time.
         </p>
         
         {/* Wallet Input Section */}
-        <div className="flex flex-col items-center mt-10">
+        <div className="flex flex-col items-center justify-between mt-10">
           <WalletInput />
           {/* Additional Links or Features (Optional) */}
           <p className="text-sm text-slate-500">

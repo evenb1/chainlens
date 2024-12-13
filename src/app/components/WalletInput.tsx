@@ -16,7 +16,7 @@ export default function WalletInput() {
 
   return (
     <div className=" w-full max-w-lg">
-      <form onSubmit={handleSubmit} className="flex items-center gap-1">
+      <form onSubmit={handleSubmit} className="flex items-center gap-2">
         <input
           type="text"
           value={wallet}
@@ -25,14 +25,14 @@ export default function WalletInput() {
           className="flex-1 p-3 px-5 text-lg rounded-md bg-neutral-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500 transition-all"
         />
 
-        <button
+<button
           type="submit"
           disabled={loading}
-          className={`bg-violet-950 text-violet-400 border border-violet-400 px-4 py-3 rounded-md font-medium transition-all hover:brightness-125 ${
+          className={`bg-violet-950 text-violet-400 border border-violet-400 border-b-4 font-medium overflow-hidden relative px-4 py-2 rounded-md hover:brightness-150 hover:border-t-4 hover:border-b active:opacity-75 outline-none duration-300 group ${
             loading ? "opacity-50 cursor-not-allowed" : ""
           }`}
         >
-          {loading ? "Loading..." : "Analyze"}
+          {loading ? "Loading..." : "Search"}
         </button>
       </form>
     </div>
