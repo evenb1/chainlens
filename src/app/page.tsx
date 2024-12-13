@@ -1,22 +1,22 @@
-import React from "react";
-import Header from "./components/Header";
-import WalletInput from "./components/WalletInput";
-import { Wallet } from 'lucide-react'
+import React, { useState } from "react";
+import { Wallet } from "lucide-react"; // Icon library (you can replace it if needed)
 
-export default function Home() {
+const HomePage = () => {
+  const [wallet, setWallet] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = (e: { preventDefault: () => void; }) => {
+    e.preventDefault();
+    if (wallet.trim()) {
+      setLoading(true);
+      // Add logic to handle wallet submission
+      setTimeout(() => setLoading(false), 1500); // Simulate loading
+    }
+  };
+
   return (
-    <div className="relative h-screen  w-screen">
-        <Header/>
-      {/* Main Content */}
-      <div className="flex flex-col p-20 items-center h-full">
-
-        <h1 className="text-5xl font-bold bg-gradient-to-r from-violet-500 to-blue-500 bg-clip-text text-transparent">Welcome to ChainLens</h1>
-        <p className="text-lg font-light text-slate-500 pb-16">Track wallet activities and trends </p>
-        <div className="flex flex-row gap-2">
-
-        <WalletInput/>
-        </div>
-      </div>
-    </div>
+    
   );
-}
+};
+
+export default HomePage;
