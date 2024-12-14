@@ -1,14 +1,16 @@
 "use client";
 import React, { useState } from "react";
 
-interface WalletBalance {
-  mintAddress: string;
-  amount: number;
+interface WalletTransaction {
+  signature: string;
+  slot: number;
 }
 
 interface WalletData {
   balances: WalletBalance[];
+  transactions: WalletTransaction[];
 }
+
 
 export default function WalletInput() {
   const [wallet, setWallet] = useState<string>("");
