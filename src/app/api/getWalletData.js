@@ -21,4 +21,11 @@ export default async function handler(req, res) {
         };
       });
   
+      // Fetch recent transactions
+      const transactions = await connection.getConfirmedSignaturesForAddress2(publicKey, { limit: 5 });
+  
+      res.status(200).json({ balances, transactions });
+    } catch (error) {
+      res.status(400).json({ error: "Failed to fetch wallet data" });
+    }
 }
