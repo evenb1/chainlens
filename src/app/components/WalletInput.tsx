@@ -1,6 +1,9 @@
 "use client";
-import React, { useState } from "react";
 
+import React, { useState } from "react";
+import { Bar } from "react-chartjs-2"; // Import charting library
+
+// Interfaces for wallet data and transactions
 interface WalletBalance {
   mintAddress: string;
   amount: number;
@@ -22,9 +25,17 @@ export default function WalletInput() {
   const [data, setData] = useState<WalletData | null>(null);
   const [error, setError] = useState<string>("");
 
+  // Wallet address validation
+  const isValidWallet = (address: string): boolean => {
+    return /^([1-9A-HJ-NP-Za-km-z]{32,44})$/.test(address); // Solana wallet regex
+  };
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!wallet.trim()) return;
+    if (!wallet.trim() || !isValidWallet(wallet)) {
+      setError("Invalid wallet address. Please enter a valid Solana address.");
+      return;
+    }
 
     setLoading(true);
     setError("");
@@ -76,6 +87,7 @@ export default function WalletInput() {
       {/* Display Results */}
       {data && (
         <>
+          {/* Wallet Balances */}
           <div className="mt-6 p-4 bg-neutral-800 rounded-md shadow-lg overflow-x-auto">
             <h2 className="text-lg font-bold text-violet-400 mb-4">Wallet Balances</h2>
             {data.balances.length > 0 ? (
@@ -100,6 +112,37 @@ export default function WalletInput() {
             )}
           </div>
 
+          {/* Chart Visualization */}
+          {data.balances.length > 0 && (
+            <div className="mt-6">
+              <h3 className="text-lg font-bold text-violet-400 mb-4">Token Balances Chart</h3>
+              <Bar
+                data={{
+                  labels: data.balances.map((balance) => balance.mintAddress),
+                  datasets: [
+                    {
+                      label: "Token Balances",
+                      data: data.balances.map((balance) => balance.amount),
+                      backgroundColor: "rgba(139, 92, 246, 0.6)", // Violet color
+                      borderColor: "rgba(139, 92, 246, 1)", // Border color
+                      borderWidth: 1,
+                    },
+                  ],
+                }}
+                options={{
+                  responsive: true,
+                  plugins: {
+                    legend: {
+                      display: true,
+                      position: "top",
+                    },
+                  },
+                }}
+              />
+            </div>
+          )}
+
+          {/* Recent Transactions */}
           <div className="mt-6 p-4 bg-neutral-800 rounded-md shadow-lg overflow-x-auto">
             <h2 className="text-lg font-bold text-violet-400 mb-4">Recent Transactions</h2>
             {data.transactions.length > 0 ? (
@@ -125,6 +168,7 @@ export default function WalletInput() {
         </>
       )}
 
+      {/* Loading Animation */}
       {loading && (
         <div className="flex justify-center mt-4">
           <div className="animate-spin rounded-full h-8 w-8 border-t-4 border-violet-400"></div>
