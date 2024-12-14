@@ -4,6 +4,15 @@ import { NextResponse } from "next/server";
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const walletAddress = searchParams.get("walletAddress");
+  
+  function isValidWalletAddress(address: string): boolean {
+    try {
+      new PublicKey(address);
+      return true;
+    } catch (error) {
+      return false;
+    }
+  }
 
   if (!walletAddress) {
     return NextResponse.json({ error: "Wallet address is required" }, { status: 400 });
