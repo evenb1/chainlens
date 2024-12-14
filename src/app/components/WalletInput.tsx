@@ -86,6 +86,27 @@ export default function WalletInput() {
     </table>
   </div>
 )}
+{data && data.transactions && (
+  <div className="mt-6 p-4 bg-neutral-800 rounded-md shadow-lg">
+    <h2 className="text-lg font-bold text-violet-400 mb-4">Recent Transactions</h2>
+    <ul className="space-y-2 text-white">
+      {data.transactions.map((tx, index) => (
+        <li key={index} className="flex justify-between">
+          <span>Slot: {tx.slot}</span>
+          <a
+            href={`https://solscan.io/tx/${tx.signature}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-violet-400 hover:underline"
+          >
+            View on Solscan
+          </a>
+        </li>
+      ))}
+    </ul>
+  </div>
+)}
+
 
     </div>
   );
