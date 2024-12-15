@@ -12,6 +12,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" className=''>
       <body className="relative h-screen w-screen ">
       {children}
+      <Footer/>
 
       </body>
     </html>

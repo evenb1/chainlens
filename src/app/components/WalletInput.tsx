@@ -68,13 +68,13 @@ export default function WalletInput() {
 
   return (
     <div className="w-full max-w-2xl mx-auto p-6">
-      <form onSubmit={handleSubmit} className="flex items-center gap-4 mb-8">
+      <form onSubmit={handleSubmit} className="flex px-24  items-center gap-2 mb-8">
         <input
           type="text"
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder="Enter wallet or token address"
-          className="flex-1 p-3 rounded-md bg-neutral-800 text-white placeholder-gray-400 focus:ring-2 focus:ring-violet-500"
+          className="flex-1 p-3 rounded-md px-5 w-2/3 bg-neutral-700 text-white placeholder-gray-400 focus:ring-2 focus:ring-violet-500"
         />
        <button
           type="submit"
@@ -108,7 +108,7 @@ export default function WalletInput() {
               </tr>
             </thead>
             <tbody>
-            {paginatedBalances?.map((token: WalletBalance, index: number) => (
+              {paginatedBalances?.map((token: WalletBalance, index: number) => (
   <tr key={index} className="border-b border-gray-700">
     <td className="py-2 px-4 flex items-center gap-2 text-white">
       <img
