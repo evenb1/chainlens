@@ -30,7 +30,13 @@ export async function GET(req: Request) {
         };
       });
   
-      
+      return new Response(JSON.stringify(tokens), { status: 200 });
+    } catch (error) {
+      console.error("Error fetching trending tokens:", error);
+      return new Response(
+        JSON.stringify({ error: "Unable to fetch trending tokens." }),
+        { status: 500 }
+      );
     }
   }
   
