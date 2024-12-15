@@ -1,3 +1,4 @@
+import Footer from './components/Footer';
 import './globals.css';
 import React from 'react';
 
@@ -8,9 +9,11 @@ export const metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className='bg-neutral-950'>
-      <body className="relative h-screen w-screen bg-neutral-950 bg-customGradient ">
+    <html lang="en" className=''>
+      <body className="relative h-screen w-screen ">
       {children}
+      <Footer/>
+
       </body>
     </html>
   );
