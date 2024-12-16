@@ -1,6 +1,6 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
-export async function GET(req) {
+export async function GET(req: { url: string | URL; }) {
   const { searchParams } = new URL(req.url);
   const mintAddress = searchParams.get("mintAddress");
 
