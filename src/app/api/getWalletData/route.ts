@@ -5,6 +5,18 @@ const connection = new Connection(
   "confirmed"
 );
 
+// Solana Token List (fetch dynamically or use a local cached version)
+const TOKEN_LIST_URL = "https://token-list-api.solana.com";
+let tokenList: any[] = [];
+
+// Load token list into memory
+async function loadTokenList() {
+  if (tokenList.length === 0) {
+    const response = await fetch(TOKEN_LIST_URL);
+    tokenList = await response.json();
+  }
+}
+
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
@@ -19,35 +31,22 @@ export async function GET(req: Request) {
 
     const publicKey = new PublicKey(walletAddress);
 
-    // 1. Fetch SOL balance
+    // Load Token List
+    await loadTokenList();
+
+    // Fetch SOL Balance
     const balance = await connection.getBalance(publicKey);
 
-    // 2. Fetch Token Accounts
+    // Fetch Token Accounts
     const tokenAccounts = await connection.getParsedTokenAccountsByOwner(publicKey, {
       programId: new PublicKey("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"),
     });
 
-    if (!tokenAccounts || !tokenAccounts.value) {
-      console.log("No tokens found for wallet:", walletAddress);
-      return new Response(
-        JSON.stringify({
-          balance: balance / 1e9,
-          tokens: [],
-        }),
-        { status: 200 }
-      );
-    }
-
-    // 3. Parse Token Data
-    const tokens = tokenAccounts.value.map((account) => {
-      const mintAddress = account.account.data.parsed.info.mint;
-      const amount = account.account.data.parsed.info.tokenAmount.uiAmount || 0;
-
-      return {
-        mintAddress,
-        amount,
-      };
+    
     });
+
+    // Sort Tokens by Balance Descending
+    tokens = tokens.sort((a, b) => b.amount - a.amount);
 
     return new Response(
       JSON.stringify({
