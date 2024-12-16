@@ -2,15 +2,15 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { Clipboard, Loader, CheckCircle } from "lucide-react";
+import { Loader, Clipboard } from "lucide-react";
 import Image from "next/image";
 
 // Types
 interface Token {
   mintAddress: string;
   amount: number;
-  tokenName: string;
-  tokenIcon: string;
+  tokenName?: string;
+  tokenIcon?: string;
 }
 
 interface WalletData {
@@ -22,26 +22,32 @@ export default function AccountPage() {
   const { address } = useParams();
   const [walletData, setWalletData] = useState<WalletData | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
-  const [currentPage, setCurrentPage] = useState(1);
+  const [error, setError] = useState<string>("");
+  const [currentPage, setCurrentPage] = useState<number>(1);
   const itemsPerPage = 5;
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchWalletData = async () => {
       try {
         const response = await fetch(`/api/getWalletData?walletAddress=${address}`);
         const data = await response.json();
-        setWalletData(data);
-      } catch {
-        setWalletData(null);
+
+        if (response.ok) {
+          setWalletData(data);
+        } else {
+          setError(data.error || "Failed to fetch wallet data.");
+        }
+      } catch (err) {
+        setError("Failed to fetch wallet data.");
       } finally {
         setLoading(false);
       }
     };
 
-    fetchData();
+    if (address) fetchWalletData();
   }, [address]);
 
-  const paginatedTokens = walletData?.tokens.slice(
+  const paginatedTokens = walletData?.tokens?.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
@@ -67,62 +73,75 @@ export default function AccountPage() {
         <div className="flex justify-center">
           <Loader className="animate-spin text-violet-400 h-10 w-10" />
         </div>
+      ) : error ? (
+        <p className="text-red-500 text-center">{error}</p>
       ) : walletData ? (
-        <div className="grid grid-cols-2 gap-4">
-          <div className="bg-neutral-800 p-6 rounded-lg">
-            <h3 className="text-gray-400">SOL Balance</h3>
-            <p className="text-2xl font-bold">{walletData.balance} SOL</p>
-          </div>
-          <div className="bg-neutral-800 p-6 rounded-lg">
-            <h3 className="text-gray-400">Token Balance</h3>
-            <p className="text-2xl font-bold">{walletData.tokens.length} Tokens</p>
-          </div>
-        </div>
-      ) : (
-        <p className="text-center text-red-500">Failed to load data.</p>
-      )}
-
-      {/* Tokens */}
-      <div className="bg-neutral-800 p-6 rounded-lg">
-        <h2 className="text-xl font-bold mb-4">Tokens</h2>
-        {paginatedTokens?.map((token, index) => (
-          <div key={index} className="flex items-center gap-4 py-2 border-b border-gray-700">
-            <Image
-              src={token.tokenIcon || "/placeholder-icon.png"}
-              alt={token.tokenName}
-              width={32}
-              height={32}
-              className="rounded-full"
-            />
-            <div className="flex-1">
-              <p className="font-bold">{token.tokenName || "Unknown Token"}</p>
-              <p className="text-gray-400 text-sm">{token.mintAddress}</p>
+        <>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="bg-neutral-800 p-6 rounded-lg">
+              <h3 className="text-gray-400">SOL Balance</h3>
+              <p className="text-2xl font-bold">{walletData.balance.toFixed(2)} SOL</p>
             </div>
-            <p className="font-bold">{token.amount.toFixed(2)}</p>
+            <div className="bg-neutral-800 p-6 rounded-lg">
+              <h3 className="text-gray-400">Token Count</h3>
+              <p className="text-2xl font-bold">{walletData.tokens.length} Tokens</p>
+            </div>
           </div>
-        ))}
 
-        {/* Pagination */}
-        <div className="flex justify-between mt-4">
-          <button
-            disabled={currentPage === 1}
-            onClick={() => setCurrentPage((p) => p - 1)}
-            className="px-4 py-2 bg-violet-600 rounded hover:bg-violet-500 disabled:opacity-50"
-          >
-            Previous
-          </button>
-          <span>
-            Page {currentPage} of {Math.ceil((walletData?.tokens.length || 1) / itemsPerPage)}
-          </span>
-          <button
-            disabled={currentPage * itemsPerPage >= (walletData?.tokens.length || 0)}
-            onClick={() => setCurrentPage((p) => p + 1)}
-            className="px-4 py-2 bg-violet-600 rounded hover:bg-violet-500 disabled:opacity-50"
-          >
-            Next
-          </button>
-        </div>
-      </div>
+          {/* Tokens */}
+          <div className="bg-neutral-800 p-6 rounded-lg">
+            <h2 className="text-xl font-bold mb-4">Tokens</h2>
+            {paginatedTokens?.map((token, index) => (
+              <div
+                key={index}
+                className="flex items-center justify-between py-2 border-b border-gray-700"
+              >
+                <div className="flex items-center gap-4">
+                  <Image
+                    src={token.tokenIcon || "/placeholder-icon.png"}
+                    alt={token.tokenName || "Unknown Token"}
+                    width={32}
+                    height={32}
+                    className="rounded-full"
+                  />
+                  <div>
+                    <p className="font-bold">{token.tokenName || "Unknown Token"}</p>
+                    <p className="text-gray-400 text-sm">{token.mintAddress}</p>
+                  </div>
+                </div>
+                <p className="font-bold">{token.amount.toFixed(6)}</p>
+              </div>
+            ))}
+
+            {/* Pagination */}
+            <div className="flex justify-between mt-4">
+              <button
+                onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+                disabled={currentPage === 1}
+                className="px-4 py-2 bg-violet-500 rounded disabled:opacity-50"
+              >
+                Previous
+              </button>
+              <span>
+                Page {currentPage} of {Math.ceil((walletData?.tokens.length || 1) / itemsPerPage)}
+              </span>
+              <button
+                onClick={() =>
+                  setCurrentPage((p) =>
+                    Math.min(p + 1, Math.ceil((walletData?.tokens.length || 1) / itemsPerPage))
+                  )
+                }
+                disabled={currentPage * itemsPerPage >= (walletData?.tokens.length || 0)}
+                className="px-4 py-2 bg-violet-500 rounded disabled:opacity-50"
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        </>
+      ) : (
+        <p className="text-center text-gray-400">No data available for this address.</p>
+      )}
     </div>
   );
 }
