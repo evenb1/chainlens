@@ -53,44 +53,36 @@ export default function WalletInput() {
     setCurrentPage(1);
   
     try {
+      // Check if input is a wallet address
       if (isWalletAddress(input)) {
-        // It's a wallet address
         setIsToken(false);
         const response = await fetch(`/api/getWalletData?walletAddress=${input}`);
         if (!response.ok) throw new Error("Failed to fetch wallet data.");
   
         const walletData = await response.json();
   
-        // Fetch token metadata and enrich data
-        const tokenMetadata = await fetchTokenMetadata();
-        const enrichedTokens = walletData.tokens.map((token: any) => {
-          const metadata = tokenMetadata.find((t) => t.address === token.mintAddress);
-          return {
-            ...token,
-            tokenName: metadata?.name || "Unknown Token",
-            tokenIcon: metadata?.logoURI || "/placeholder-icon.png",
-          };
-        });
+        // Fetch token metadata from QuickNode
+        
   
-        // Sort tokens from highest to lowest balance
+        // Sort tokens and set data
         const sortedTokens = enrichedTokens.sort((a: Token, b: Token) => b.amount! - a.amount!);
-  
         setData({ balance: walletData.balance, tokens: sortedTokens });
       } else {
-        // It's a token address
+        // Fetch token-specific data from QuickNode
         setIsToken(true);
-        const response = await fetch(`/api/getTokenData?tokenAddress=${input}`);
-        if (!response.ok) throw new Error("Failed to fetch token data.");
+        const tokenResponse = await fetch(`/api/getTokenMetadata?mintAddress=${input}`);
+        if (!tokenResponse.ok) throw new Error("Failed to fetch token data.");
   
-        const tokenData = await response.json();
-        setData({ tokens: [tokenData] }); // Wrap in an array for consistency
+        const tokenData = await tokenResponse.json();
+        setData({ tokens: [tokenData] });
       }
     } catch (err: any) {
-      setError(err.message || "Error fetching data. Please try again.");
+      setError(err.message || "Something went wrong. Please try again.");
     } finally {
       setLoading(false);
     }
   };
+  
   
 
   // Pagination logic
