@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { fetchTokenMetadata } from "@/utils/tokenMetadata";
 import { Clipboard, Loader, ImageIcon } from "lucide-react"; // Icons for design
 import Image from "next/image";
+import { isWalletAddress } from "@/utils/detectAddress";
 
 // Types
 interface Token {
@@ -45,25 +46,24 @@ export default function WalletInput() {
       setError("Please enter a valid wallet or token address.");
       return;
     }
-
+  
     setLoading(true);
     setError("");
     setData(null);
     setCurrentPage(1);
-
+  
     try {
-      const response = await fetch(`/api/getWalletData?walletAddress=${input}`);
-      const result = await response.json();
-
-      if (result.isToken) {
-        // If input is a token address
-        setIsToken(true);
-        setData({ tokens: [result.tokenDetails] });
-      } else {
-        // If input is a wallet address
+      if (isWalletAddress(input)) {
+        // It's a wallet address
+        setIsToken(false);
+        const response = await fetch(`/api/getWalletData?walletAddress=${input}`);
+        if (!response.ok) throw new Error("Failed to fetch wallet data.");
+  
+        const walletData = await response.json();
+  
+        // Fetch token metadata and enrich data
         const tokenMetadata = await fetchTokenMetadata();
-
-        const enrichedTokens = result.tokens.map((token: any) => {
+        const enrichedTokens = walletData.tokens.map((token: any) => {
           const metadata = tokenMetadata.find((t) => t.address === token.mintAddress);
           return {
             ...token,
@@ -71,18 +71,27 @@ export default function WalletInput() {
             tokenIcon: metadata?.logoURI || "/placeholder-icon.png",
           };
         });
-
+  
+        // Sort tokens from highest to lowest balance
         const sortedTokens = enrichedTokens.sort((a: Token, b: Token) => b.amount! - a.amount!);
-
-        setIsToken(false);
-        setData({ balance: result.balance, tokens: sortedTokens });
+  
+        setData({ balance: walletData.balance, tokens: sortedTokens });
+      } else {
+        // It's a token address
+        setIsToken(true);
+        const response = await fetch(`/api/getTokenData?tokenAddress=${input}`);
+        if (!response.ok) throw new Error("Failed to fetch token data.");
+  
+        const tokenData = await response.json();
+        setData({ tokens: [tokenData] }); // Wrap in an array for consistency
       }
     } catch (err: any) {
-      setError("Error fetching data. Please try again.");
+      setError(err.message || "Error fetching data. Please try again.");
     } finally {
       setLoading(false);
     }
   };
+  
 
   // Pagination logic
   const totalPages = data?.tokens ? Math.ceil(data.tokens.length / itemsPerPage) : 0;
