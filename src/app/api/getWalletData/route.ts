@@ -4,6 +4,7 @@ const connection = new Connection(
   "https://methodical-serene-wind.solana-mainnet.quiknode.pro/8f63c36a1ecd61a5962f323693564b86fb31ba36",
   "confirmed"
 );
+const TOKEN_METADATA_URL = "https://api.coingecko.com/api/v3/simple/price"; // Replace with QuickNode or other APIs
 
 
 export async function GET(req: Request) {
