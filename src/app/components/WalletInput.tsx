@@ -62,7 +62,18 @@ export default function WalletInput() {
         const walletData = await response.json();
   
         // Fetch token metadata from QuickNode
-        
+        const enrichedTokens = await Promise.all(
+          walletData.tokens.map(async (token: any) => {
+            const metadataResponse = await fetch(`/api/getTokenMetadata?mintAddress=${token.mintAddress}`);
+            const metadata = await metadataResponse.json();
+  
+            return {
+              ...token,
+              tokenName: metadata?.name || "Unknown Token",
+              tokenIcon: metadata?.logo || "/placeholder-icon.png",
+            };
+          })
+        );
   
         // Sort tokens and set data
         const sortedTokens = enrichedTokens.sort((a: Token, b: Token) => b.amount! - a.amount!);
