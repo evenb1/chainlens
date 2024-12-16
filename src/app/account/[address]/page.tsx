@@ -9,8 +9,9 @@ import Image from "next/image";
 interface Token {
   mintAddress: string;
   amount: number;
-  tokenName?: string;
-  tokenIcon?: string;
+  tokenName: string;
+  tokenIcon: string;
+  price: number;
 }
 
 interface WalletData {
@@ -23,8 +24,6 @@ export default function AccountPage() {
   const [walletData, setWalletData] = useState<WalletData | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>("");
-  const [currentPage, setCurrentPage] = useState<number>(1);
-  const itemsPerPage = 5;
 
   useEffect(() => {
     const fetchWalletData = async () => {
@@ -44,13 +43,8 @@ export default function AccountPage() {
       }
     };
 
-    if (address) fetchWalletData();
+    fetchWalletData();
   }, [address]);
-
-  const paginatedTokens = walletData?.tokens?.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
 
   return (
     <div className="bg-black min-h-screen text-white p-6 space-y-6">
@@ -91,52 +85,29 @@ export default function AccountPage() {
           {/* Tokens */}
           <div className="bg-neutral-800 p-6 rounded-lg">
             <h2 className="text-xl font-bold mb-4">Tokens</h2>
-            {paginatedTokens?.map((token, index) => (
-              <div
-                key={index}
-                className="flex items-center justify-between py-2 border-b border-gray-700"
-              >
+            {walletData.tokens.map((token, index) => (
+              <div key={index} className="flex items-center justify-between py-2 border-b border-gray-700">
                 <div className="flex items-center gap-4">
                   <Image
-                    src={token.tokenIcon || "/placeholder-icon.png"}
-                    alt={token.tokenName || "Unknown Token"}
+                    src={token.tokenIcon}
+                    alt={token.tokenName}
                     width={32}
                     height={32}
                     className="rounded-full"
                   />
                   <div>
-                    <p className="font-bold">{token.tokenName || "Unknown Token"}</p>
+                    <p className="font-bold">{token.tokenName}</p>
                     <p className="text-gray-400 text-sm">{token.mintAddress}</p>
                   </div>
                 </div>
-                <p className="font-bold">{token.amount.toFixed(6)}</p>
+                <div>
+                  <p className="font-bold">{token.amount.toFixed(6)}</p>
+                  <p className="text-gray-400 text-sm">
+                    ~${(token.amount * token.price).toFixed(2)} USD
+                  </p>
+                </div>
               </div>
             ))}
-
-            {/* Pagination */}
-            <div className="flex justify-between mt-4">
-              <button
-                onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
-                disabled={currentPage === 1}
-                className="px-4 py-2 bg-violet-500 rounded disabled:opacity-50"
-              >
-                Previous
-              </button>
-              <span>
-                Page {currentPage} of {Math.ceil((walletData?.tokens.length || 1) / itemsPerPage)}
-              </span>
-              <button
-                onClick={() =>
-                  setCurrentPage((p) =>
-                    Math.min(p + 1, Math.ceil((walletData?.tokens.length || 1) / itemsPerPage))
-                  )
-                }
-                disabled={currentPage * itemsPerPage >= (walletData?.tokens.length || 0)}
-                className="px-4 py-2 bg-violet-500 rounded disabled:opacity-50"
-              >
-                Next
-              </button>
-            </div>
           </div>
         </>
       ) : (
