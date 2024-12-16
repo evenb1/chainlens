@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@solana/spl-token-registry": "^0.2.4574",
     "@solana/web3.js": "^1.95.8",
     "@tabler/icons-react": "^3.24.0",
     "chart.js": "^4.4.7",
