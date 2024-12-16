@@ -162,47 +162,51 @@ export default function WalletInput() {
 
           {/* Pagination */}
           <div className="flex justify-between mt-4">
-            <button
-              disabled={currentPage === 1}
-              onClick={() => setCurrentPage((p) => p - 1)}
-              className="text-white disabled:opacity-50"
-            >
-              Previous
-            </button>
-            <span className="text-white">
-              Page {currentPage} of {totalPages}
-            </span>
-            <button
-              disabled={currentPage === totalPages}
-              onClick={() => setCurrentPage((p) => p + 1)}
-              className="text-white disabled:opacity-50"
-            >
-              Next
-            </button>
-          </div>
+  <button
+    disabled={currentPage === 1}
+    onClick={() => setCurrentPage((p) => p - 1)}
+    className="text-white px-4 py-2 bg-violet-500 rounded-md disabled:opacity-50"
+  >
+    Previous
+  </button>
+  <span className="text-white">
+    Page {currentPage} of {totalPages || 1}
+  </span>
+  <button
+    disabled={currentPage === totalPages}
+    onClick={() => setCurrentPage((p) => p + 1)}
+    className="text-white px-4 py-2 bg-violet-500 rounded-md disabled:opacity-50"
+  >
+    Next
+  </button>
+</div>
+
         </div>
       )}
 
       {/* Token Address */}
       {data && isToken && (
-        <div className="bg-neutral-800 p-6 rounded-md shadow-lg">
-          <h2 className="text-xl text-violet-400 mb-4">{data.tokens[0]?.tokenName || "Token Details"}</h2>
-          <Image
-            src={data.tokens[0]?.tokenIcon || "/placeholder-icon.png"}
-            alt="Token"
-            width={64}
-            height={64}
-            className="rounded-full mx-auto"
-          />
-          <ul className="mt-4 text-white">
-            <li>Liquidity: {data.tokens[0]?.liquidity || "N/A"}</li>
-            <li>Market Cap: {data.tokens[0]?.marketCap || "N/A"}</li>
-            <li>Holders: {data.tokens[0]?.holders || "N/A"}</li>
-            <li>Age: {data.tokens[0]?.age || "N/A"}</li>
-            <li>% Change: {data.tokens[0]?.percentChange || "N/A"}</li>
-          </ul>
-        </div>
-      )}
+  <div className="bg-neutral-800 p-6 rounded-md shadow-lg text-center">
+    <Image
+      src={data.tokens[0]?.tokenIcon || "/placeholder-icon.png"}
+      alt={data.tokens[0]?.tokenName || "Token"}
+      width={64}
+      height={64}
+      className="rounded-full mx-auto mb-4"
+    />
+    <h2 className="text-2xl text-violet-400 mb-2">
+      {data.tokens[0]?.tokenName || "Token Details"}
+    </h2>
+    <ul className="text-white space-y-2">
+      <li>Liquidity: ${data.tokens[0]?.liquidity || "N/A"}</li>
+      <li>Market Cap: ${data.tokens[0]?.marketCap || "N/A"}</li>
+      <li>Holders: {data.tokens[0]?.holders || "N/A"}</li>
+      <li>Age: {data.tokens[0]?.age || "N/A"}</li>
+      <li>% Change: {data.tokens[0]?.percentChange || "N/A"}</li>
+    </ul>
+  </div>
+)}
+
     </div>
   );
 }
