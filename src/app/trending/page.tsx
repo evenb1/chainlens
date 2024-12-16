@@ -53,6 +53,17 @@ export default function Trending() {
       token.name.toLowerCase().includes(search.toLowerCase()) ||
       token.symbol.toLowerCase().includes(search.toLowerCase())
   );
+  const formatNumber = (num: number): string => {
+  if (num >= 1e9) {
+    return (num / 1e9).toFixed(1) + "B"; // Billions
+  } else if (num >= 1e6) {
+    return (num / 1e6).toFixed(1) + "M"; // Millions
+  } else if (num >= 1e3) {
+    return (num / 1e3).toFixed(1) + "K"; // Thousands
+  } else {
+    return num.toString(); // Less than 1000, show the number as is
+  }
+};
 
   const copyToClipboard = (address: string) => {
     navigator.clipboard.writeText(address);
@@ -131,9 +142,9 @@ export default function Trending() {
                     </div>
                   </td>
                   <td className="py-2 px-4 text-right text-white">${token.price.toFixed(6)}</td>
-                  <td className="py-2 px-4 text-right text-white">${token.marketCap.toLocaleString()}</td>
-                  <td className="py-2 px-4 text-right text-white">${token.liquidity.toLocaleString()}</td>
-                  <td className="py-2 px-4 text-right text-white">${token.volume.toLocaleString()}</td>
+                  <td className="py-2 px-4 text-right text-white">${formatNumber(Number(token.marketCap.toLocaleString().replace(/,/g, "")))}</td>
+                  <td className="py-2 px-4 text-right text-white">${formatNumber(Number(token.liquidity.toLocaleString().replace(/,/g, "")))}</td>
+                  <td className="py-2 px-4 text-right text-white">${formatNumber(Number(token.volume.toLocaleString().replace(/,/g, "")))}</td>
                   <td className="py-2 px-4 text-right text-white">{token.age}</td>
                   <td
                     className={`py-2 px-4 text-right ${
