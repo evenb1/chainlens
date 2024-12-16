@@ -42,7 +42,21 @@ export async function GET(req: Request) {
       programId: new PublicKey("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"),
     });
 
-    
+    // Parse Tokens and Enrich with Metadata
+    let tokens = tokenAccounts.value.map((account) => {
+      const mintAddress = account.account.data.parsed.info.mint;
+      const amount = account.account.data.parsed.info.tokenAmount.uiAmount || 0;
+
+      // Match with token list
+      const metadata = tokenList.find((token) => token.address === mintAddress);
+
+      return {
+        mintAddress,
+        amount,
+        tokenName: metadata?.name || "Unknown Token",
+        tokenIcon: metadata?.logoURI || "/placeholder-icon.png",
+        price: metadata?.price || 0, // You can integrate CoinGecko for real-time price
+      };
     });
 
     // Sort Tokens by Balance Descending
