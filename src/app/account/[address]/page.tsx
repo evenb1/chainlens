@@ -1,10 +1,11 @@
 "use client";
 
-import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Loader } from "lucide-react";
+import { useParams } from "next/navigation";
+import { Clipboard, Loader, CheckCircle } from "lucide-react";
 import Image from "next/image";
 
+// Types
 interface Token {
   mintAddress: string;
   amount: number;
@@ -19,77 +20,109 @@ interface WalletData {
 
 export default function AccountPage() {
   const { address } = useParams();
-  const [data, setData] = useState<WalletData | null>(null);
+  const [walletData, setWalletData] = useState<WalletData | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string>("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
 
   useEffect(() => {
-    const fetchWalletData = async () => {
+    const fetchData = async () => {
       try {
         const response = await fetch(`/api/getWalletData?walletAddress=${address}`);
-        if (!response.ok) throw new Error("Failed to fetch wallet data");
-        const result = await response.json();
-        setData(result);
-      } catch (err) {
-        setError("Error fetching data. Please try again.");
+        const data = await response.json();
+        setWalletData(data);
+      } catch {
+        setWalletData(null);
       } finally {
         setLoading(false);
       }
     };
 
-    if (address) fetchWalletData();
+    fetchData();
   }, [address]);
 
+  const paginatedTokens = walletData?.tokens.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
   return (
-    <div className="bg-black min-h-screen text-white p-6">
+    <div className="bg-black min-h-screen text-white p-6 space-y-6">
       {/* Header */}
-      <div className="text-center mb-6">
-        <h1 className="text-4xl font-bold">Account Details</h1>
-        <p className="text-gray-400">{address}</p>
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-4xl font-bold">Account</h1>
+          <p className="flex items-center gap-2 text-gray-400">
+            {address}
+            <Clipboard
+              className="cursor-pointer hover:text-violet-400"
+              onClick={() => navigator.clipboard.writeText(address as string)}
+            />
+          </p>
+        </div>
       </div>
 
-      {/* Loading State */}
-      {loading && (
-        <div className="flex justify-center items-center">
-          <Loader className="animate-spin h-12 w-12 text-violet-400" />
+      {/* Overview */}
+      {loading ? (
+        <div className="flex justify-center">
+          <Loader className="animate-spin text-violet-400 h-10 w-10" />
         </div>
-      )}
-
-      {/* Error State */}
-      {error && <p className="text-red-500 text-center">{error}</p>}
-
-      {/* Wallet Data */}
-      {data && (
-        <div className="space-y-6">
-          {/* SOL Balance */}
-          <div className="bg-neutral-800 p-6 rounded-md shadow-md">
-            <h2 className="text-gray-400">SOL Balance</h2>
-            <p className="text-3xl font-bold">{data.balance.toFixed(2)} SOL</p>
+      ) : walletData ? (
+        <div className="grid grid-cols-2 gap-4">
+          <div className="bg-neutral-800 p-6 rounded-lg">
+            <h3 className="text-gray-400">SOL Balance</h3>
+            <p className="text-2xl font-bold">{walletData.balance} SOL</p>
           </div>
-
-          {/* Tokens */}
-          <div className="bg-neutral-800 p-6 rounded-md shadow-md">
-            <h2 className="text-xl font-bold mb-4">Token Balances</h2>
-            <ul>
-              {data.tokens.map((token, index) => (
-                <li key={index} className="flex items-center gap-4 mb-3">
-                  <Image
-                    src={token.tokenIcon || "/placeholder-icon.png"}
-                    alt="Token Icon"
-                    width={32}
-                    height={32}
-                    className="rounded-full"
-                  />
-                  <div>
-                    <p className="font-bold">{token.tokenName}</p>
-                    <p className="text-gray-400">{token.amount.toFixed(6)}</p>
-                  </div>
-                </li>
-              ))}
-            </ul>
+          <div className="bg-neutral-800 p-6 rounded-lg">
+            <h3 className="text-gray-400">Token Balance</h3>
+            <p className="text-2xl font-bold">{walletData.tokens.length} Tokens</p>
           </div>
         </div>
+      ) : (
+        <p className="text-center text-red-500">Failed to load data.</p>
       )}
+
+      {/* Tokens */}
+      <div className="bg-neutral-800 p-6 rounded-lg">
+        <h2 className="text-xl font-bold mb-4">Tokens</h2>
+        {paginatedTokens?.map((token, index) => (
+          <div key={index} className="flex items-center gap-4 py-2 border-b border-gray-700">
+            <Image
+              src={token.tokenIcon || "/placeholder-icon.png"}
+              alt={token.tokenName}
+              width={32}
+              height={32}
+              className="rounded-full"
+            />
+            <div className="flex-1">
+              <p className="font-bold">{token.tokenName || "Unknown Token"}</p>
+              <p className="text-gray-400 text-sm">{token.mintAddress}</p>
+            </div>
+            <p className="font-bold">{token.amount.toFixed(2)}</p>
+          </div>
+        ))}
+
+        {/* Pagination */}
+        <div className="flex justify-between mt-4">
+          <button
+            disabled={currentPage === 1}
+            onClick={() => setCurrentPage((p) => p - 1)}
+            className="px-4 py-2 bg-violet-600 rounded hover:bg-violet-500 disabled:opacity-50"
+          >
+            Previous
+          </button>
+          <span>
+            Page {currentPage} of {Math.ceil((walletData?.tokens.length || 1) / itemsPerPage)}
+          </span>
+          <button
+            disabled={currentPage * itemsPerPage >= (walletData?.tokens.length || 0)}
+            onClick={() => setCurrentPage((p) => p + 1)}
+            className="px-4 py-2 bg-violet-600 rounded hover:bg-violet-500 disabled:opacity-50"
+          >
+            Next
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
