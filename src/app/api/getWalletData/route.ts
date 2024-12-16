@@ -6,7 +6,8 @@ const connection = new Connection(
 );
 
 // Solana Token List (fetch dynamically or use a local cached version)
-const TOKEN_LIST_URL = "https://token-list-api.solana.com";
+const TOKEN_LIST_URL = "https://raw.githubusercontent.com/solana-labs/token-list/main/src/tokens/solana.tokenlist.json";
+;
 let tokenList: any[] = [];
 
 // Load token list into memory
