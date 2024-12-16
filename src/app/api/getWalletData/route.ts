@@ -23,7 +23,15 @@ export async function GET(req: Request) {
 
     // 1. Fetch SOL Balance
     const balance = await connection.getBalance(publicKey);
+// 2. Fetch Token Accounts
+const tokenAccounts = await connection.getParsedTokenAccountsByOwner(publicKey, {
+  programId: new PublicKey("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"),
+});
 
+let tokens = tokenAccounts.value.map((account) => ({
+  mintAddress: account.account.data.parsed.info.mint,
+  amount: account.account.data.parsed.info.tokenAmount.uiAmount || 0,
+}));
     
 
     // 3. Fetch Metadata for Tokens (Token Names and Icons)
