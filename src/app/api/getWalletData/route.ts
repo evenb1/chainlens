@@ -4,8 +4,6 @@ const connection = new Connection(
   "https://methodical-serene-wind.solana-mainnet.quiknode.pro/8f63c36a1ecd61a5962f323693564b86fb31ba36",
   "confirmed"
 );
-const TOKEN_METADATA_URL = "https://api.coingecko.com/api/v3/simple/price"; // Replace with QuickNode or other APIs
-
 
 export async function GET(req: Request) {
   try {
@@ -21,54 +19,40 @@ export async function GET(req: Request) {
 
     const publicKey = new PublicKey(walletAddress);
 
-    // 1. Fetch SOL Balance
+    // 1. Fetch SOL balance
     const balance = await connection.getBalance(publicKey);
-// 2. Fetch Token Accounts
-const tokenAccounts = await connection.getParsedTokenAccountsByOwner(publicKey, {
-  programId: new PublicKey("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"),
-});
 
-let tokens = tokenAccounts.value.map((account) => ({
-  mintAddress: account.account.data.parsed.info.mint,
-  amount: account.account.data.parsed.info.tokenAmount.uiAmount || 0,
-}));
-    
-
-    // 3. Fetch Metadata for Tokens (Token Names and Icons)
-    const tokenMetadata = await fetch("https://token-list-api.solana.com").then((res) =>
-      res.json()
-    );
-
-    tokens = tokens.map((token) => {
-      const metadata = tokenMetadata.find((t: any) => t.address === token.mintAddress);
-      return {
-        ...token,
-        tokenName: metadata?.name || "Unknown Token",
-        tokenIcon: metadata?.logoURI || "/placeholder-icon.png",
-      };
+    // 2. Fetch Token Accounts
+    const tokenAccounts = await connection.getParsedTokenAccountsByOwner(publicKey, {
+      programId: new PublicKey("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"),
     });
 
-    // 4. Fetch USD Prices for Tokens (Optional: Using CoinGecko API)
-    const tokenPriceResponse = await fetch(
-      `${TOKEN_METADATA_URL}?ids=solana&vs_currencies=usd`
-    );
-    const priceData = await tokenPriceResponse.json();
-    const solPrice = priceData.solana.usd;
+    if (!tokenAccounts || !tokenAccounts.value) {
+      console.log("No tokens found for wallet:", walletAddress);
+      return new Response(
+        JSON.stringify({
+          balance: balance / 1e9,
+          tokens: [],
+        }),
+        { status: 200 }
+      );
+    }
 
-    // 5. Fetch Recent Transactions
-    const transactions = await connection.getConfirmedSignaturesForAddress2(publicKey, {
-      limit: 5,
+    // 3. Parse Token Data
+    const tokens = tokenAccounts.value.map((account) => {
+      const mintAddress = account.account.data.parsed.info.mint;
+      const amount = account.account.data.parsed.info.tokenAmount.uiAmount || 0;
+
+      return {
+        mintAddress,
+        amount,
+      };
     });
 
     return new Response(
       JSON.stringify({
         balance: balance / 1e9, // Convert lamports to SOL
-        solPrice: solPrice,
-        tokens: tokens,
-        transactions: transactions.map((tx) => ({
-          signature: tx.signature,
-          blockTime: new Date(tx.blockTime! * 1000).toLocaleString(),
-        })),
+        tokens,
       }),
       { status: 200 }
     );
