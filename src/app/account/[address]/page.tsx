@@ -18,11 +18,37 @@ interface WalletData {
   tokens: Token[];
 }
 
+
 export default function AccountPage() {
+
   const { address } = useParams();
   const [walletData, setWalletData] = useState<WalletData | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>("");
+const fetchWalletData = async () => {
+  setLoading(true);
+  setError("");
+  setWalletData(null);
+
+  try {
+    const response = await fetch(`/api/getWalletData?walletAddress=${address}`);
+    const data = await response.json();
+
+    console.log("API Response:", data); // Log the API response
+
+    if (response.ok) {
+      setWalletData(data);
+    } else {
+      console.error("API Error:", data.error);
+      setError(data.error || "Failed to fetch wallet data.");
+    }
+  } catch (err) {
+    console.error("Fetch Error:", err);
+    setError("Failed to fetch wallet data.");
+  } finally {
+    setLoading(false);
+  }
+};
 
   useEffect(() => {
     const fetchWalletData = async () => {
