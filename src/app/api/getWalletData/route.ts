@@ -20,10 +20,12 @@ async function loadTokenList() {
 
 export async function GET(req: Request) {
   try {
+    console.log("Request received...");
     const { searchParams } = new URL(req.url);
     const walletAddress = searchParams.get("walletAddress");
 
     if (!walletAddress) {
+      console.error("No wallet address provided.");
       return new Response(
         JSON.stringify({ error: "Wallet address is required." }),
         { status: 400 }
@@ -33,17 +35,33 @@ export async function GET(req: Request) {
     const publicKey = new PublicKey(walletAddress);
 
     // Load Token List
+    console.log("Loading token list...");
     await loadTokenList();
+    console.log("Token list loaded. Length:", tokenList.length);
 
     // Fetch SOL Balance
+    console.log("Fetching SOL balance...");
     const balance = await connection.getBalance(publicKey);
+    console.log("SOL balance:", balance / 1e9);
 
     // Fetch Token Accounts
+    console.log("Fetching token accounts...");
     const tokenAccounts = await connection.getParsedTokenAccountsByOwner(publicKey, {
       programId: new PublicKey("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"),
     });
 
-    // Parse Tokens and Enrich with Metadata
+    if (!tokenAccounts || !tokenAccounts.value) {
+      console.error("No token accounts found for wallet:", walletAddress);
+      return new Response(
+        JSON.stringify({
+          balance: balance / 1e9,
+          tokens: [],
+        }),
+        { status: 200 }
+      );
+    }
+
+    console.log("Parsing tokens...");
     let tokens = tokenAccounts.value.map((account) => {
       const mintAddress = account.account.data.parsed.info.mint;
       const amount = account.account.data.parsed.info.tokenAmount.uiAmount || 0;
@@ -56,12 +74,13 @@ export async function GET(req: Request) {
         amount,
         tokenName: metadata?.name || "Unknown Token",
         tokenIcon: metadata?.logoURI || "/placeholder-icon.png",
-        price: metadata?.price || 0, // You can integrate CoinGecko for real-time price
+        price: metadata?.price || 0,
       };
     });
 
     // Sort Tokens by Balance Descending
     tokens = tokens.sort((a, b) => b.amount - a.amount);
+    console.log("Tokens parsed and sorted:", tokens);
 
     return new Response(
       JSON.stringify({
@@ -78,3 +97,5 @@ export async function GET(req: Request) {
     );
   }
 }
+
+
