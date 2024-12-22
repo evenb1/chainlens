@@ -18,57 +18,43 @@ interface WalletData {
   tokens: Token[];
 }
 
-
 export default function AccountPage() {
-
   const { address } = useParams();
   const [walletData, setWalletData] = useState<WalletData | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>("");
-const fetchWalletData = async () => {
-  setLoading(true);
-  setError("");
-  setWalletData(null);
 
-  try {
-    const response = await fetch(`/api/getWalletData?walletAddress=${address}`);
-    const data = await response.json();
+  const fetchWalletData = async () => {
+    setLoading(true);
+    setError("");
+    setWalletData(null);
 
-    console.log("API Response:", data); // Log the API response
+    try {
+      const response = await fetch(`/api/getWalletData?walletAddress=${address}`);
+      const data = await response.json();
 
-    if (response.ok) {
-      setWalletData(data);
-    } else {
-      console.error("API Error:", data.error);
-      setError(data.error || "Failed to fetch wallet data.");
+      console.log("API Response:", data);
+
+      if (response.ok) {
+        setWalletData(data);
+      } else {
+        console.error("API Error:", data.error);
+        setError(data.error || "Failed to fetch wallet data.");
+      }
+    } catch (err) {
+      console.error("Fetch Error:", err);
+      setError("Failed to fetch wallet data.");
+    } finally {
+      setLoading(false);
     }
-  } catch (err) {
-    console.error("Fetch Error:", err);
-    setError("Failed to fetch wallet data.");
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   useEffect(() => {
-    const fetchWalletData = async () => {
-      try {
-        const response = await fetch(`/api/getWalletData?walletAddress=${address}`);
-        const data = await response.json();
-
-        if (response.ok) {
-          setWalletData(data);
-        } else {
-          setError(data.error || "Failed to fetch wallet data.");
-        }
-      } catch (err) {
-        setError("Failed to fetch wallet data.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchWalletData();
+    if (address) {
+      fetchWalletData();
+    } else {
+      setError("Wallet address not provided.");
+    }
   }, [address]);
 
   if (loading) {
@@ -114,29 +100,36 @@ const fetchWalletData = async () => {
       {/* Tokens */}
       <div className="bg-neutral-800 p-6 rounded-lg">
         <h2 className="text-xl font-bold mb-4">Tokens</h2>
-        {walletData?.tokens.map((token, index) => (
-          <div key={index} className="flex items-center justify-between py-2 border-b border-gray-700">
-            <div className="flex items-center gap-4">
-              <Image
-                src={token.tokenIcon}
-                alt={token.tokenName}
-                width={32}
-                height={32}
-                className="rounded-full"
-              />
+        {walletData?.tokens.length === 0 ? (
+          <p className="text-gray-400">No tokens found.</p>
+        ) : (
+          walletData?.tokens.map((token, index) => (
+            <div
+              key={index}
+              className="flex items-center justify-between py-2 border-b border-gray-700"
+            >
+              <div className="flex items-center gap-4">
+                <Image
+                  src={token.tokenIcon || "/default-token-icon.png"}
+                  alt={token.tokenName}
+                  width={32}
+                  height={32}
+                  className="rounded-full"
+                />
+                <div>
+                  <p className="font-bold">{token.tokenName}</p>
+                  <p className="text-gray-400 text-sm">{token.mintAddress}</p>
+                </div>
+              </div>
               <div>
-                <p className="font-bold">{token.tokenName}</p>
-                <p className="text-gray-400 text-sm">{token.mintAddress}</p>
+                <p className="font-bold">{token.amount.toFixed(6)}</p>
+                <p className="text-gray-400 text-sm">
+                  ~${((token.amount || 0) * (token.price || 0)).toFixed(2)} USD
+                </p>
               </div>
             </div>
-            <div>
-              <p className="font-bold">{token.amount.toFixed(6)}</p>
-              <p className="text-gray-400 text-sm">
-                ~${(token.amount * token.price).toFixed(2)} USD
-              </p>
-            </div>
-          </div>
-        ))}
+          ))
+        )}
       </div>
     </div>
   );

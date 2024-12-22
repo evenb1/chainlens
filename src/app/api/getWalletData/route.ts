@@ -1,104 +1,68 @@
 import { Connection, PublicKey } from "@solana/web3.js";
+import type { NextApiRequest, NextApiResponse } from "next";
 
 const connection = new Connection(
   "https://methodical-serene-wind.solana-mainnet.quiknode.pro/8f63c36a1ecd61a5962f323693564b86fb31ba36",
   "confirmed"
 );
 
-const TOKEN_LIST_URL = "https://raw.githubusercontent.com/solana-labs/token-list/main/src/tokens/solana.tokenlist.json";
-let tokenList: any[] = [];
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  console.log("API triggered");
 
-// Load token metadata into memory
-async function loadTokenList() {
-  try {
-    if (tokenList.length === 0) {
-      console.log("Fetching token list...");
-      const response = await fetch(TOKEN_LIST_URL);
-      tokenList = await response.json();
-      console.log("Token list fetched. Length:", tokenList.length);
-    }
-  } catch (err) {
-    console.error("Error fetching token list:", err);
-    throw new Error("Failed to load token list.");
+  if (req.method !== "GET") {
+    console.error("Invalid method:", req.method);
+    return res.status(405).json({ error: "Method not allowed. Use GET." });
   }
-}
 
-export async function GET(req: Request) {
   try {
-    console.log("Request received...");
-    const { searchParams } = new URL(req.url);
-    const walletAddress = searchParams.get("walletAddress");
+    const { walletAddress } = req.query as { walletAddress?: string };
 
-    if (!walletAddress) {
-      console.error("Wallet address is missing.");
-      return new Response(
-        JSON.stringify({ error: "Wallet address is required." }),
-        { status: 400 }
-      );
+    if (!walletAddress || typeof walletAddress !== "string") {
+      console.error("Invalid wallet address:", walletAddress);
+      return res.status(400).json({ error: "Invalid wallet address." });
     }
+
+    console.log("Wallet Address:", walletAddress);
 
     const publicKey = new PublicKey(walletAddress);
-    console.log("PublicKey created:", publicKey.toBase58());
 
-    // Load token list
-    console.log("Loading token list...");
-    await loadTokenList();
-
-    // Fetch SOL Balance
-    console.log("Fetching SOL balance...");
-    const lamports = await connection.getBalance(publicKey);
-    const solBalance = lamports / 1e9;
-    console.log("SOL balance:", solBalance);
-
-    // Fetch Token Accounts
-    console.log("Fetching token accounts...");
-    const tokenAccounts = await connection.getParsedTokenAccountsByOwner(publicKey, {
-      programId: new PublicKey("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"),
-    });
-
-    if (!tokenAccounts || !tokenAccounts.value) {
-      console.error("No token accounts found.");
-      return new Response(
-        JSON.stringify({
-          solBalance,
-          tokens: [],
-        }),
-        { status: 200 }
-      );
+    // Fetch SOL balance
+    let lamports;
+    try {
+      lamports = await connection.getBalance(publicKey);
+      console.log("SOL Balance in lamports:", lamports);
+    } catch (error) {
+      console.error("Error fetching balance:", error);
+      return res.status(500).json({ error: "Error fetching SOL balance." });
     }
 
-    // Parse and Enrich Tokens
-    console.log("Parsing tokens...");
+    // Fetch token accounts
+    let tokenAccounts;
+    try {
+      tokenAccounts = await connection.getParsedTokenAccountsByOwner(publicKey, {
+        programId: new PublicKey("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"),
+      });
+      console.log("Token Accounts:", tokenAccounts);
+    } catch (error) {
+      console.error("Error fetching token accounts:", error);
+      return res.status(500).json({ error: "Error fetching token accounts." });
+    }
+
+    // Parse and return tokens
     const tokens = tokenAccounts.value.map((account) => {
       const mintAddress = account.account.data.parsed.info.mint;
       const amount = account.account.data.parsed.info.tokenAmount.uiAmount || 0;
-
-      const metadata = tokenList.find((token) => token.address === mintAddress);
-      return {
-        mintAddress,
-        amount,
-        tokenName: metadata?.name || "Unknown Token",
-        tokenIcon: metadata?.logoURI || "/placeholder-icon.png",
-        price: metadata?.price || 0,
-      };
+      return { mintAddress, amount };
     });
 
-    // Sort Tokens by Balance
-    const sortedTokens = tokens.sort((a, b) => b.amount - a.amount);
-    console.log("Tokens sorted:", sortedTokens);
+    console.log("Parsed Tokens:", tokens);
 
-    return new Response(
-      JSON.stringify({
-        solBalance,
-        tokens: sortedTokens,
-      }),
-      { status: 200 }
-    );
+    return res.status(200).json({
+      solBalance: lamports / 1e9,
+      tokens,
+    });
   } catch (error) {
-    console.error("Error in API:", error);
-    return new Response(
-      JSON.stringify({ error: "Failed to fetch wallet data." }),
-      { status: 500 }
-    );
+    console.error("Error in handler:", error);
+    return res.status(500).json({ error: "Failed to fetch wallet data." });
   }
 }
